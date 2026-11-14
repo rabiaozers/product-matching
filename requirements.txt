@@ -1,0 +1,7 @@
+fastapi==0.162.4
+uvicorn==0.54.0
+sentence-transformers==6.2.0
+faiss-cpu==1.16.0
+pandas
+numpy
+scikit-learn

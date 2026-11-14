@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Data and models are not committed: see "How to run" in README.md
+data/
+models/
+*.zip

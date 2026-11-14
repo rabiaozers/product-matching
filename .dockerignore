@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+data/raw/
+data/*.csv
+data/*.zip
+models/minilm-abtbuy-neg/
