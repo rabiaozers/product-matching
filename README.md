@@ -11,7 +11,7 @@ This project decides automatically whether two product titles describe the same 
 
 **Live demo:** [Streamlit app](https://rabiaozers-item-matching.streamlit.app/): compare two titles or search the catalog in the browser. The fine-tuned model is on the Hugging Face Hub: [rabiaozers/minilm-abtbuy](https://huggingface.co/rabiaozers/minilm-abtbuy).
 
-<!-- Add a short GIF of the demo here: ![demo](demo.gif) -->
+![Demo: matching two titles, a known weakness, and catalog search](demo.gif)
 
 ## How it works
 
