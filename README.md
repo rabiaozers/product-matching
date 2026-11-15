@@ -99,11 +99,13 @@ The threshold, hybrid weight and model folder are not hard-coded in the API: `tu
 
 ## How to run
 
-Data and models are not in the repository.
+The data is not stored in this repository (see step 2). The fine-tuned model is on Hugging Face: [rabiaozers/minilm-abtbuy](https://huggingface.co/rabiaozers/minilm-abtbuy).
 
 1. Install: `pip install torch` and `pip install -r requirements.txt`
 2. Download [`abt_buy_exp_data.zip`](http://pages.cs.wisc.edu/~anhai/data1/deepmatcher_data/Textual/Abt-Buy/abt_buy_exp_data.zip) and put `tableA.csv`, `tableB.csv`, `train.csv`, `valid.csv`, `test.csv` in `data/deepmatcher/`.
-3. Fine-tune (about 25 minutes on a laptop CPU): `python finetune.py`
+3. Get the fine-tuned model, either
+   - download it from Hugging Face: `python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('rabiaozers/minilm-abtbuy').save('models/minilm-abtbuy')"`, or
+   - train it yourself (about 25 minutes on a laptop CPU): `python finetune.py`
 4. Choose the hybrid weight and threshold: `python tune_weight.py`
 5. Start the API: `uvicorn app:app --reload`, or with Docker:
 

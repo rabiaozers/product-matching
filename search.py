@@ -50,7 +50,8 @@ class CatalogSearch:
         """Return the k most similar catalog products as (row number, similarity) pairs."""
         query_vector = self.vectorize([query]).astype("float32")
         scores, rows = self.index.search(query_vector, k)
-        return [(int(r), float(s)) for r, s in zip(rows[0], scores[0])]
+        # If k is larger than the catalog, FAISS fills the missing places with row -1: drop them.
+        return [(int(r), float(s)) for r, s in zip(rows[0], scores[0]) if r >= 0]
 
 
 def recall_at_k(catalog, matches, catalog_ids, ks=(1, 5, 10, 20)):

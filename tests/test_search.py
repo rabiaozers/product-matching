@@ -34,3 +34,11 @@ def test_hybrid_vectors_give_the_weighted_score():
 
     expected = w * dot(first) + (1 - w) * dot(second)
     assert dot(glued) == pytest.approx(expected)
+
+
+def test_k_larger_than_catalog_returns_only_real_products():
+    tfidf = TfidfMatcher().fit(CATALOG)
+    catalog = CatalogSearch(tfidf_vectors(tfidf.vectorizer), CATALOG)
+    results = catalog.search("sony home theater", k=10)
+    assert len(results) == len(CATALOG)
+    assert all(row >= 0 for row, _ in results)
