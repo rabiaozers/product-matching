@@ -9,6 +9,27 @@ Buy:  nikon coolpix p6000 13 megapixels digital camera w / 4x wide angle
 
 This project decides automatically whether two product titles describe the same product, and serves the model as a REST API (FastAPI, FAISS, Docker). It is the problem behind price comparison sites and catalog deduplication.
 
+**Live demo:** [Streamlit app](STREAMLIT_URL): compare two titles or search the catalog in the browser. The fine-tuned model is on the Hugging Face Hub: [rabiaozers/minilm-abtbuy](https://huggingface.co/rabiaozers/minilm-abtbuy).
+
+<!-- Add a short GIF of the demo here: ![demo](demo.gif) -->
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[Title from store A] --> T[TF-IDF<br/>character 3-grams]
+    B[Title from store B] --> T
+    A --> E[Fine-tuned<br/>sentence embedding]
+    B --> E
+    T -->|cosine x 0.6| H[Hybrid score]
+    E -->|cosine x 0.4| H
+    H --> D{score > threshold?}
+    D -->|yes| S[Same product]
+    D -->|no| N[Different]
+```
+
+The same hybrid score powers catalog search: each product becomes one vector `[√w · tfidf, √(1−w) · embedding]`, and FAISS returns the nearest ones.
+
 ## Results (test set)
 
 | Method | Threshold | Precision | Recall | F1 |
@@ -43,7 +64,7 @@ Only about 11% of the pairs are matches. A model that always says "different" ge
 2. **A pretrained embedding lost to TF-IDF** (F1 0.469). Error analysis showed that almost all of its false alarms were products of the same brand and category that differ only in the model code (`panasonic nnsd797s` vs `nnsd767s`). The model compares meaning, not codes.
 3. **Fine-tuning** the embedding model on the labelled training pairs (cosine similarity pushed towards the label, 3 epochs) fixed most of this: F1 0.703, recall 0.44 → 0.79.
 4. **Hybrid.** TF-IDF sees characters, the fine-tuned model sees meaning, and they make different mistakes. A weighted average of the two scores gave the best result (F1 0.745). Any weight between 0.2 and 0.6 gave a similar validation F1, so the result is not sensitive to this choice.
-5. **Leakage check.** About 90% of test products also appear in training pairs, so a fine-tuned model could memorise products. On test pairs with at least one product never seen in training (128 pairs), the fine-tuned model still beat TF-IDF, by an even larger margin (F1 0.868 vs 0.739; vs 0.634 and 0.612 on seen pairs). It learned to compare codes rather than memorising products. The unseen group is small, so these numbers are noisy.
+5. **Leakage check.** About 90% of test products also appear in training pairs, so a fine-tuned model could memorise products. On test pairs with at least one product never seen in training (128 pairs), the fine-tuned model still beat TF-IDF, by an even larger margin (F1 0.868 vs 0.739; vs 0.634 and 0.612 on seen pairs). It learned to compare codes rather than memorising products. The unseen group is small (128 pairs) and has a much higher match rate (52% vs 8% in the seen group), so its F1 is not directly comparable to the seen group; the comparison that matters is between the two models within each group.
 6. **Search revealed a new failure.** In catalog search, the fine-tuned model ranked a *coffee maker* (`delonghi dc50b`) first for a Sony home theater (`davis50b`): it focused on the code and ignored the category. The training pairs were all "similar but different" products, so it never learned to reject obviously unrelated ones. Hybrid vectors (`[√w · tfidf, √(1−w) · embedding]`, whose dot product equals the hybrid score) fixed this: recall@1 0.883.
 7. **Experiment: easy negatives.** Adding one random negative pair per training pair improved the model on its own (search recall@1 0.641 → 0.680, match F1 0.703 → 0.717) but not inside the hybrid (0.883 → 0.869, within noise), because TF-IDF already supplies the category signal. The API keeps the original model.
 
@@ -91,6 +112,8 @@ docker build -t product-matching .
 docker run --rm -p 8000:8000 product-matching
 ```
 
+Demo locally: `pip install -r streamlit_app/requirements.txt` and `streamlit run streamlit_app/app.py`. The fine-tuned model is uploaded once with `python streamlit_app/upload_model.py`.
+
 Unit tests (no data or model needed): `python -m pytest -q`
 
 ## Files
@@ -104,5 +127,6 @@ Unit tests (no data or model needed): `python -m pytest -q`
 | `tune_weight.py` | Choose the hybrid weight and threshold on validation; write the config |
 | `search.py` | FAISS catalog search, hybrid vectors, recall@k |
 | `app.py` | FastAPI service: `/match`, `/search`, `/health` |
+| `streamlit_app/` | Live demo (Streamlit Community Cloud): same models, weight and threshold as the API; loads the model from the Hugging Face Hub |
 | `explore.py`, `errors.py`, `unseen_check.py`, `compare_models.py` | Data exploration, error analysis, leakage check, model comparison |
 | `tests/` | Unit tests (run by GitHub Actions on every push) |
