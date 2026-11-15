@@ -9,7 +9,7 @@ Buy:  nikon coolpix p6000 13 megapixels digital camera w / 4x wide angle
 
 This project decides automatically whether two product titles describe the same product, and serves the model as a REST API (FastAPI, FAISS, Docker). It is the problem behind price comparison sites and catalog deduplication.
 
-**Live demo:** [Streamlit app](STREAMLIT_URL): compare two titles or search the catalog in the browser. The fine-tuned model is on the Hugging Face Hub: [rabiaozers/minilm-abtbuy](https://huggingface.co/rabiaozers/minilm-abtbuy).
+**Live demo:** [Streamlit app](https://rabiaozers-item-matching.streamlit.app/): compare two titles or search the catalog in the browser. The fine-tuned model is on the Hugging Face Hub: [rabiaozers/minilm-abtbuy](https://huggingface.co/rabiaozers/minilm-abtbuy).
 
 <!-- Add a short GIF of the demo here: ![demo](demo.gif) -->
 
